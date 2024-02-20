@@ -1,5 +1,8 @@
 package com.testnow720.cotlsavereader;
 
+import java.io.FileReader;
+import java.io.IOException;
+
 import com.testnow720.cotlsavereader.cotlsavereadwriter.CotLSaveSerializer;
 
 public class Main {
@@ -45,13 +48,31 @@ public class Main {
 				
 				String path2 = (commandArg.length == 2 && commandArg[1] != null) ? commandArg[1] : System.getProperty("user.dir") + "\\output.json";
 				
-				String data2 = saveSerializer.read(commandArg[0]);
-				if (data2 == null) {
+				FileReader reader = null;
+				StringBuilder data2 = new StringBuilder();
+				try {
+					reader = new FileReader(commandArg[0]);
+					
+					int curr = -1;
+					while ((curr = reader.read()) != -1) {
+						data2.append((char) curr);
+					}
+				} catch (IOException e) {
+					System.out.println("There was an error reading a file.");
+				} finally {
+					try {
+						if (reader != null) {
+							reader.close();
+						}
+					} catch (IOException e) {}
+				}
+				
+				if (data2.toString() == null) {
 					System.out.println("There was an error reading a file to be encoded.");
 					return;
 				}
 				
-				boolean status = saveSerializer.write(path2, saveSerializer.read(commandArg[0]), true);
+				boolean status = saveSerializer.write(path2, data2.toString(), true);
 				if (!status) {
 					System.out.println("Failed to write encrypted save file to path.");
 					return;
